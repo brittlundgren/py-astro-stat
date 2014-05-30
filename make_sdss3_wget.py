@@ -44,20 +44,12 @@ if __name__ == '__main__':
 
             # change integer values to strings
             mjdstr = str(mjd)
+
             # add leading zeros to plate number, if less than 1000
-            if int(plate)<1000:
-                platestr='0'+str(plate)
-            else:
-                platestr = str(plate)
+            platestr = str(plate).zfill(4)
+
             # add leading zeros to fiber number, if necessary
-            if fiber<10:
-                fiberstr='000'+str(fiber)
-            elif fiber<100:
-                fiberstr='00'+str(fiber)
-            elif fiber<1000:
-                fiberstr='0'+str(fiber)
-            else:
-                fiberstr=str(fiber)
+            fiberstr = str(fiber).zfill(4)
  
             specid = 'spec-'+platestr+'-'+mjdstr+'-'+fiberstr+'.fits'
 
