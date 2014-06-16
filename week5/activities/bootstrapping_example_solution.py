@@ -1,45 +1,7 @@
 #!/usr/bin/python
 
-''' Activity to introduce the concept and implementation of bootstrapping.
-
-This activity is meant to help you practice Pythonic programming. Pythonic
-programming means to code for humans, not for computers. One of the clearest
-and most efficient ways to write your programs is to write their purpose and
-their functionalities first. The code below consists of the first steps of
-efficient programming.
-
-Modular coding is key to success! The coder in this case has recognized what
-the separate tasks are in their problem and wrote them into individual
-functions. You will notice that there is no code written though! The coder has
-designed their code before writing it. You will notice each function has a
-number of arguments and a docstring (documentation) describing the arguments of
-the function.
-
-Your job is to finish the code.
-
-Perform the activity in the following way:
-    1. Read each of the functions, their arguments, and their docstrings.
-
-    2. Discuss with your group how to implement the design to solve the problem
-    at hand.
-
-    3. Implement the code in pairs or as a single group.
-
-    4. Perform any additional analysis on your results to test their validity.
-
-    5. Choose an individual presenter. Prepare a short presentation < 3 min to
-    present to the class on how you solved the problem and what your results
-    are. Discuss with the class what were the weaknesses of the design and what
-    you would change.
-
-The function at the bottom, main(), is where you will write your script. Python
-sets the __name__ variable to be equal to '__main__' in this case, thus the
-script will execute the main() function. This is a common and composed way to
-write scripts in Python.
-
-*** Read the main function docstring first! ***
-
-'''
+import numpy as np
+import matplotlib.pyplot as plt
 
 def bootstrap(data, num_samples, alpha, return_samples=False):
 
@@ -56,11 +18,13 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     alpha : float
         Confidence level = 100.*(1 - alpha)
     return_samples : bool
-        Return the bootstrapped samples? Useful for calculating multiple
-        confidence intervals without rerunning bootstraps.
+        Optional. Return the bootstrapped samples? Useful for calculating
+        multiple confidence intervals without rerunning bootstraps.
 
     Returns
     -------
+    conf_int : tuple, float
+        Lower error and upper error at 100*(1-alpha) confidence of the data.
     samples : array-like
         Array of each resampled data. Will have one extra dimension than the
         data of length num_samples, representing each simulation.
@@ -77,7 +41,18 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     (50, 100,)
     '''
 
-    pass # delete after function code written
+    samples = np.empty((num_samples, data.size))
+
+    for i in range(num_samples):
+        idx = np.random.randint(0, data.size, data.size)
+        samples[i,:] = data[idx]
+
+    errors = calc_bootstrap_error(samples, alpha)
+
+    if return_samples:
+        return errors, samples
+    else:
+    	return errors
 
 def load_data(file_name):
 
@@ -96,7 +71,9 @@ def load_data(file_name):
 
     '''
 
-    pass # delete after function code written
+    data = np.load(file_name)
+
+    return data
 
 def calc_bootstrap_error(samples, alpha):
 
@@ -114,7 +91,7 @@ def calc_bootstrap_error(samples, alpha):
     Returns
     -------
     conf_int : tuple, float
-        Lower error and upper error at confidence of the data.
+        Lower error and upper error at 100*(1-alpha) confidence of the data.
 
     Examples
     --------
@@ -126,7 +103,12 @@ def calc_bootstrap_error(samples, alpha):
 
     '''
 
-    pass # comment after function code written
+    means,cdf = calc_cdf(samples)
+    cdf_vals = [0.5-(alpha/2.0), 0.5, 0.5+(alpha/2.)]
+    mean_ret = np.interp(cdf_vals,cdf,means)
+    mean_vals=[mean_ret[1],mean_ret[2]-mean_ret[1],mean_ret[1]-mean_ret[0]]
+
+    return np.array(mean_vals)
 
 def calc_cdf(samples):
 
@@ -147,7 +129,10 @@ def calc_cdf(samples):
 
     '''
 
-    pass # delete after function code written
+    means = np.sort(np.mean(samples,axis=1))
+    cdf = np.cumsum(means)/np.sum(means)
+
+    return means,cdf
 
 def plot_cdf(x, cdf, errors=None):
 
@@ -174,6 +159,17 @@ def plot_cdf(x, cdf, errors=None):
 
     '''
 
+    ax = plt.figure().add_subplot(111)
+    ax.plot(x, cdf)
+
+    # check for vertical error lines
+    if errors is not None:
+        ax.axvline(x=errors[0], ls=':', alpha=0.7, color='b')
+        ax.axvline(x=errors[1], ls='-', alpha=0.7, color='b')
+    ax.set_xlabel('Mean')
+    ax.set_ylabel('CDF')
+    ax.figure.show()
+
 def main():
 
     ''' Your goal is to write a bootstrap function for determining errors in a
@@ -194,7 +190,14 @@ def main():
 
     '''
 
-    pass
+
+    file_name = 'data/bootstrap_distribution.npy'
+
+    data = load_data(file_name)
+
+    errors = bootstrap(data, 10, 0.05)
+
+    print errors
 
 if __name__ == '__main__':
     main()

@@ -29,7 +29,7 @@ from astroML.datasets import fetch_sdss_specgals
 # result in an error if LaTeX is not installed on your system.  In that case,
 # you can set usetex to False.
 from astroML.plotting import setup_text_plots
-setup_text_plots(fontsize=8, usetex=True)
+setup_text_plots(fontsize=8, usetex=False)
 
 #------------------------------------------------------------
 # Get the data and perform redshift/magnitude cuts
@@ -47,7 +47,7 @@ data = data[data['petroMag_r'] < m_max]
 # divide red sample and blue sample based on u-r color
 ur = data['modelMag_u'] - data['modelMag_r']
 flag_red = (ur > 2.22)
-flag_blue = ~flag_red
+flag_blue = ~flag_red # tilde means inverse
 
 data_red = data[flag_red]
 data_blue = data[flag_blue]
@@ -73,10 +73,11 @@ z_mu = interpolate.interp1d(mu_sample, z_sample)
 data = [data_red, data_blue]
 titles = ['$u-r > 2.22$', '$u-r < 2.22$']
 markers = ['o', '^']
-archive_files = ['lumfunc_red.npz', 'lumfunc_blue.npz']
+archive_files = ['lumfunc_red_freedman.npz', 'lumfunc_blue_freedman.npz']
+archive_files = ['lumfunc_red_scott.npz', 'lumfunc_blue_scott.npz']
 
-
-def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20):
+def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20,
+        bin_type='freedman'):
     """Compute the luminosity function and archive in the given file.
 
     If the file exists, then the saved results are returned.
@@ -85,14 +86,15 @@ def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20):
     zmax = z_mu(m_max - M)
 
     if not os.path.exists(archive_file):
-        print ("- computing bootstrapped luminosity function ",
+        print("- computing bootstrapped luminosity function " + \
                "for %i points" % len(z))
 
-        zbins = np.linspace(0.08, 0.12, 21)
-        Mbins = np.linspace(-24, -20.2, 21)
-
-        zbin_width, zbins = free_bin(z, return_bins=True)
-        Mbin_width, Mbins = free_bin(M, return_bins=True)
+        if bin_type == 'freedman':
+            zbin_width, zbins = free_bin(z, return_bins=True)
+            Mbin_width, Mbins = free_bin(M, return_bins=True)
+        elif bin_type == 'scott':
+            zbin_width, zbins = scott_bin(z, return_bins=True)
+            Mbin_width, Mbins = scott_bin(M, return_bins=True)
 
         dist_z, err_z, dist_M, err_M = bootstrap_Cminus(z, M, zmax, Mmax,
                                                         zbins, Mbins,
@@ -116,7 +118,7 @@ def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20):
 
 #------------------------------------------------------------
 # Perform the computation and plot the results
-fig = plt.figure(figsize=(5, 5))
+fig = plt.figure(figsize=(8, 8))
 
 for i in range(2):
     m = data[i]['petroMag_r']
@@ -125,29 +127,44 @@ for i in range(2):
 
     # compute the luminosity function for the given subsample
     zbins, dist_z, err_z, Mbins, dist_M, err_M = \
-        compute_luminosity_function(z, m, M, m_max, archive_files[i])
+        compute_luminosity_function(z, m, M, m_max, archive_files[i],
+                bin_type='scott')
+
+    ax1 = fig.add_subplot(1, 2, 1)
+    factor = 0.08 ** 2 / (0.5 * (zbins[1:] + zbins[:-1])) ** 2
+    ax1.errorbar(0.5 * (zbins[1:] + zbins[:-1]),
+                 factor * dist_z, factor * err_z,
+                 fmt='-k' + markers[i], ecolor='gray', lw=1, ms=4,
+                 label=titles[i])
 
     #------------------------------------------------------------
     # Third axes: plot the inferred 1D distribution in M
-    ax = fig.add_subplot(111, yscale='log')
+    ax2 = fig.add_subplot(122, yscale='log')
 
     # truncate the bins so the plot looks better
     Mbins = Mbins[3:-1]
     dist_M = dist_M[3:-1]
     err_M = err_M[3:-1]
 
-    ax.errorbar(0.5 * (Mbins[1:] + Mbins[:-1]), dist_M, err_M,
+    ax2.errorbar(0.5 * (Mbins[1:] + Mbins[:-1]), dist_M, err_M,
                  fmt='-k' + markers[i], ecolor='gray', lw=1, ms=4,
                  label=titles[i])
 
 #------------------------------------------------------------
 # set labels and limits
-ax.legend(loc=3)
-ax.xaxis.set_major_locator(plt.MultipleLocator(1.0))
-ax.set_xlabel(r'$M$')
-ax.set_ylabel(r'$\Phi(M)$')
-ax.set_xlim(-20, -23.5)
-ax.set_ylim(1E-5, 2)
+ax1.legend(loc=1)
+ax1.xaxis.set_major_locator(plt.MultipleLocator(0.01))
+ax1.set_xlabel(r'$z$')
+ax1.set_ylabel(r'$\rho(z) / [z / 0.08]^2$')
+ax1.set_xlim(0.075, 0.125)
+ax1.set_ylim(10, 25)
+
+ax2.legend(loc=3)
+ax2.xaxis.set_major_locator(plt.MultipleLocator(1.0))
+ax2.set_xlabel(r'$M$')
+ax2.set_ylabel(r'$\Phi(M)$')
+ax2.set_xlim(-20, -23.5)
+ax2.set_ylim(1E-5, 2)
 
 plt.show()
 
