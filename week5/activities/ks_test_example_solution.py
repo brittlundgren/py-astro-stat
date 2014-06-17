@@ -122,17 +122,16 @@ def main():
 
     Notes
     -----
-    -> To get the indices of which elements are equal to a value use
-    numpy.where:
+    -> To get the indices of which elements are equal to a value use booleans:
         >>> import numpy as np
         >>> a = np.array([4, 5, 6])
-        >>> print(np.where(a == 5))
-        (array([1]),)
+        >>> print(a == 5)
+        array([False,  True, False], dtype=bool)
         >>> b = np.array([7, 8, 9])
-        >>> print(b[np.where(a == 5)])
+        >>> print(b[a == 5])
         [8]
 
-    -> To randomly sample an array use random.sample
+    -> To randomly sample an array uniquely use random.sample
 
 
     '''

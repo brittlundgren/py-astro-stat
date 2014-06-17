@@ -45,7 +45,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-def bootstrap(data, num_samples, alpha, return_samples=False):
+def bootstrap(data, num_samples):
 
     ''' Bootstraps data to determine errors. Resamples the data num_samples
     times. Returns errors of a bootstrap simulation at the 100.*(1 - alpha)
@@ -57,14 +57,11 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
         Array of data in the form of an numpy.ndarray
     num_samples : int
         Number of times to resample the data.
-    alpha : float
-        Confidence level = 100.*(1 - alpha)
-    return_samples : bool
-        Return the bootstrapped samples? Useful for calculating multiple
-        confidence intervals without rerunning bootstraps.
 
     Returns
     -------
+    conf_int : tuple, float
+        Lower error and upper error at 100*(1-alpha) confidence of the data.
     samples : array-like
         Array of each resampled data. Will have one extra dimension than the
         data of length num_samples, representing each simulation.
@@ -72,7 +69,8 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     Notes
     -----
     -> arrays can be initialized with numpy.empty
-    -> random samples can be retrieved from an array with random.sample
+
+    -> numpy.random.randit can be used to draw random non-unique indices
 
     Examples
     --------
@@ -86,7 +84,7 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     (50, 100,)
     '''
 
-    pass # delete after function code written
+    pass # delete line after code is written
 
 def load_data(file_name):
 
