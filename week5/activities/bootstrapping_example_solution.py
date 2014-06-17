@@ -28,8 +28,7 @@ def bootstrap(data, num_samples):
     Notes
     -----
     -> arrays can be initialized with numpy.empty
-
-    -> numpy.random.randit can be used to draw random non-unique indices
+    -> random samples can be retrieved from an array with random.sample
 
     Examples
     --------
@@ -45,10 +44,8 @@ def bootstrap(data, num_samples):
 
     samples = np.empty((num_samples, data.size))
 
-    # Explore np.random.randint
     for i in range(num_samples):
-        indices = np.random.randint(0, data.size, data.size)
-        samples[i,:] = data[indices]
+        samples[i,:] = random.sample(data, data.size)
 
     return samples
 
@@ -148,6 +145,9 @@ def plot_cdf(x, cdf, conf_int=None):
     -------
     None
 
+    Notes
+    -----
+
 
     '''
 
@@ -215,10 +215,8 @@ def main():
 
     conf_int = calc_bootstrap_error(samples, 0.05)
 
-    # Prints mean, lower error, higher error
     print conf_int
 
-    # Grab means and CDF for plotting
     x, cdf = calc_cdf(samples)
 
     plot_cdf(x, cdf, conf_int=conf_int)

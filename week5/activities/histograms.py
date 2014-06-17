@@ -65,10 +65,7 @@ def derive_dist_mod_tables(z_lims, n_bins):
 
     '''
 
-    pass # delete after code is written
-
-def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20,
-        bin_type='freedman', z_mu=None):
+def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20):
 
     ''' Compute the luminosity function and archive in the given file. If the
     file exists, then the saved results are returned.
@@ -87,10 +84,6 @@ def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20,
         Name of file saved for bootstrapping.
     Nbootstraps : int
         Number of bootstraps to perform.
-    bin_type : str
-        Type of binning method to use. Options are 'freedman' or 'scott'
-    z_mu : func
-        Distance modulus as a function of redshift.
 
     Returns
     -------
@@ -109,43 +102,17 @@ def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20,
 
     '''
 
-    pass # delete after code is written
+    pass # delete line after code is written
 
-def cut_data(data, z_min, z_max, m_max):
-
-    ''' Performs redshift/magnitude cuts on the data.
-
-    Parameters
-    ----------
-    data : array-like
-        Dictionary of sdss galaxies
-    z_min : float
-        Lower redshift limit
-    z_max : float
-        Higher redshift limit
-    m_max : float
-        Upper apparent magnitude limit
-
-    Returns
-    -------
-    data_red : array-like
-        Cut data including red galaxies
-    data_blue : array-like
-        Cut data including blue galaxies
-
-    '''
-
-    pass # delete after code is written
-
-def plot_luminosity_function(Mbins_list, dist_M_list, err_M_list, titles=None):
+def plot_luminosity_function(Mbins, dist_M_list, err_M_list):
 
     ''' Plots the normalized luminosity functions Phi(M) vs (M) for multiple
     samples. Reproduces the bottom right plot of Figure 4.10.
 
     Parameters
     ----------
-    Mbins_list : array-like
-        Tuple of absolute magnitude bin centers.
+    Mbins : array-like
+        Absolute magnitude bin centers.
     dist_M_list : tuple, list
         Tuple of absolute magnitude count distributions.
     err_M_list : tuple, list
@@ -159,9 +126,9 @@ def plot_luminosity_function(Mbins_list, dist_M_list, err_M_list, titles=None):
 
     '''
 
-    pass # delete after code is written
+    pass # delete line after code is written
 
-def plot_num_density(zbins_list, dist_z_list, err_z_list, titles=None):
+def plot_num_density(zbins, dist_z_list, err_z_list):
 
     ''' Plots the number density of galaxies for multiple samples.
     Specifically, rho(z) / [z/0.08]^2 vs z where rho(z) is the number density
@@ -170,8 +137,8 @@ def plot_num_density(zbins_list, dist_z_list, err_z_list, titles=None):
 
     Parameters
     ----------
-    zbins_list : array-like
-        Tuple of absolute redshift bin centers.
+    zbins : array-like
+        Absolute redshift bin centers.
     dist_z_list : tuple, list
         Tuple of redshift count distributions.
     err_z_list : tuple, list
@@ -185,16 +152,14 @@ def plot_num_density(zbins_list, dist_z_list, err_z_list, titles=None):
 
     '''
 
-    pass # delete after code is written
+    pass # delete line after code is written
 
 def main():
 
     ''' Your goal is to recalculate the luminosity function for the red and
     blue galaxies presented in the lower right of Figure 4.10 using
     reproducible methods for histogram binning. This activity divides the
-    script for making these plots into more modular format. The above functions
-    are only suggestions for how to divide the script, feel free to modularize
-    the script in a different fashion.
+    script for making these plots into more modular format.
 
     Figure 4.10 shows how the probability density of galaxies as function of
     redshift and absolute magnitude varies for two different galaxy populations
@@ -206,42 +171,40 @@ def main():
     confusing, the top-right plot shows that the number density of redder
     galaxies, u-r > 2.22, is more dense than blue galaxies at smaller
     redshifts.  The luminosity function plotted in the bottom right show that
-    there are fewer bright blue galaxies, u-r < 2.22, than bright red galaxies,
+    there are fewer faint blue galaxies, u-r < 2.22, than faint red galaxies,
     u-r > 2.22.
 
-    Read through the script
-    http://www.astroml.org/book_figures/chapter4/fig_lyndenbell_gals.html
-    to understand the steps the authors take to calculate the luminosity and
-    volume number density functions for red and blue galaxies from the SDSS
-    archive.
-
-    *** Truncate the sample to 1/10 the size as commented in line 48 and 49 ***
-    *** Else computation time exorbitant ***
-
-    The author create redshift and absolute magnitude bins to compute the
-    luminosity function. Find where these bins are initialized, and change the
-    binning method to either Freedman-Diaconis or Scott. Use the most
-    appropriate binning strategy for the data.
+    Use the most appropriate binning strategy for the data. To save on time,
+    the luminosity function bootstrapping has been pre-computed for the
+    Freedman-Diaconis and Scott binning algorithms as the following in the
+    'data' directory:
+                            Galaxy      Filename
+                            Type
+                          --------------------------
+        Freedman-Diaconis:  blue        lumfunc_blue_freedman.npz
+                            red         lumfunc_red_freedman.npz
+                    Scott:  blue        lumfunc_blue_scott.npz
+                            red         lumfunc_red_scott.npz
 
     Plot the results on the same scale and with the same limits as the code in
     the example script.
 
     Does the histogram change how you interpret the results of this data?
 
-    Notes
-    -----
-    -> The Freedman-Diaconis and Scott binning methods can imported as
-    functions in the following way:
-        from astroML.density_estimation import scotts_bin_width as scott_bin
-        from astroML.density_estimation import freedman_bin_width as free_bin
-
     '''
 
-    pass # delete after code is written
-
+    pass # delete line after code is written
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
+
+
+
 
 
 
