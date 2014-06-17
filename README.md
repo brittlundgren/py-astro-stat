@@ -27,12 +27,19 @@ Switch to a new branch
 ```bash
 git checkout -b newbranch
 ```
-Make your edits to the repository.
+Make your edits to the repository. To send changes back to the repository, first add the changes to git, then commit them to the local repository, then push them to the branch.
+```bash
+git add newmaterial
+git commit -m 'Added new material'
+git push origin newbranch
+```
 When finished, switch back to the master branch.
 ```bash
 git checkout -b master
 ```
 Push your edits to the master branch
 ```bash
+git add newmaterial
+git commit -m 'Added new material'
 git push origin master
 ```
