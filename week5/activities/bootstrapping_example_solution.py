@@ -2,8 +2,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
-def bootstrap(data, num_samples, alpha, return_samples=False):
+def bootstrap(data, num_samples):
 
     ''' Bootstraps data to determine errors. Resamples the data num_samples
     times. Returns errors of a bootstrap simulation at the 100.*(1 - alpha)
@@ -15,11 +16,6 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
         Array of data in the form of an numpy.ndarray
     num_samples : int
         Number of times to resample the data.
-    alpha : float
-        Confidence level = 100.*(1 - alpha)
-    return_samples : bool
-        Optional. Return the bootstrapped samples? Useful for calculating
-        multiple confidence intervals without rerunning bootstraps.
 
     Returns
     -------
@@ -28,6 +24,11 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     samples : array-like
         Array of each resampled data. Will have one extra dimension than the
         data of length num_samples, representing each simulation.
+
+    Notes
+    -----
+    -> arrays can be initialized with numpy.empty
+    -> random samples can be retrieved from an array with random.sample
 
     Examples
     --------
@@ -44,15 +45,126 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     samples = np.empty((num_samples, data.size))
 
     for i in range(num_samples):
-        idx = np.random.randint(0, data.size, data.size)
-        samples[i,:] = data[idx]
+        samples[i,:] = random.sample(data, data.size)
 
-    errors = calc_bootstrap_error(samples, alpha)
+    return samples
 
-    if return_samples:
-        return errors, samples
-    else:
-    	return errors
+def calc_bootstrap_error(samples, alpha):
+
+    ''' Returns errors of a bootstrap simulation at the 100.*(1 - alpha)
+    confidence interval. Errors are computed by deriving a cumulative
+    distribution function of the means of the sampled data and determining the
+    distance between the mean and the value including alpha/2 % of the data,
+    and the value including alpha/2 % of the data.
+
+    Parameters
+    ----------
+    samples : array-like
+        Array of each resampled data.
+
+    Returns
+    -------
+    conf_int : tuple, float
+        Mean of the data, the lower error and the upper error at 100*(1-alpha)
+        confidence of the data.
+
+    Notes
+    -----
+    -> To find the index in an array closest to a given value, use the
+    numpy.argmin function to find the index of the minimum value in an array.
+    For example to find the value closest to 11.1 in an array of 10, 11, and 12:
+        >>> import numpy as np
+        >>> a = np.array([10, 11, 12])
+        >>> print(np.argmin(np.abs(a - 11.1)))
+        1
+
+    Examples
+    --------
+    >>> import scipy
+    >>> import numpy as np
+    >>> data = scipy.random.f(1, 2, 100)
+    >>> samples = bootstrap(data, 50)
+    >>> errors = calc_bootstrap_error(samples, 0.05)
+
+    '''
+
+    means, cdf = calc_cdf(samples)
+    mean = means[np.argmin(np.abs(cdf - 0.5))]
+    error_low = means[np.argmin(np.abs(cdf - alpha/2.))]
+    error_high = means[np.argmin(np.abs(cdf - (1 - alpha/2.)))]
+
+    return (mean, mean - error_low, error_high - mean)
+
+def calc_cdf(samples):
+
+    ''' Calculates a cumulative distribution function of the means of each
+    instance of resampled data.
+
+    Parameters
+    ----------
+    samples : array-like
+        Array of each resampled data.
+
+    Returns
+    -------
+    means : array-like
+        Array containing mean values for the cdf.
+    cdf : array-like
+        Array containing fraction of data below value x.
+
+    Notes
+    -----
+    -> numpy.sort can be used to sort the means.
+    -> numpy.cumsum can be used to calculate a cumulative sum, which should be
+        normalized
+
+    '''
+
+    means = np.sort(np.mean(samples, axis=0))
+    cdf = np.cumsum(means) / np.sum(means)
+
+    return means, cdf
+
+def plot_cdf(x, cdf, conf_int=None):
+
+    ''' Plots the cumulative distribution function of the means of each
+    instance of the resampled data. If errors are supplied, then vertical lines
+    will be plotted at each error.
+
+    Parameters
+    ----------
+    x : array-like
+        Array containing mean values for the cdf.
+    cdf : array-like
+        Array containing fraction of data below value x.
+    conf_int : tuple, float, optional
+        Mean of the data, the lower error and the upper error at 100*(1-alpha)
+        confidence of the data.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+
+
+    '''
+
+    # Set up figure
+    ax = plt.figure().add_subplot(111)
+    ax.set_xlabel('Mean')
+    ax.set_ylabel('CDF')
+
+    # Plot CDF of bootstrap means
+    ax.plot(x, cdf)
+
+    # check for vertical error lines
+    if conf_int is not None:
+        ax.axvline(x=conf_int[0] - conf_int[1], ls=':', alpha=0.7, color='b')
+        ax.axvline(x=conf_int[0] + conf_int[2], ls='-', alpha=0.7, color='b')
+
+    ax.figure.show()
 
 def load_data(file_name):
 
@@ -75,101 +187,6 @@ def load_data(file_name):
 
     return data
 
-def calc_bootstrap_error(samples, alpha):
-
-    ''' Returns errors of a bootstrap simulation at the 100.*(1 - alpha)
-    confidence interval. Errors are computed by deriving a cumulative
-    distribution function of the means of the sampled data and determining the
-    distance between the mean and the value including alpha/2 % of the data,
-    and the value including alpha/2 % of the data.
-
-    Parameters
-    ----------
-    samples : array-like
-        Array of each resampled data.
-
-    Returns
-    -------
-    conf_int : tuple, float
-        Lower error and upper error at 100*(1-alpha) confidence of the data.
-
-    Examples
-    --------
-    >>> import scipy
-    >>> import numpy as np
-    >>> data = scipy.random.f(1, 2, 100)
-    >>> samples = bootstrap(data, 50)
-    >>> errors = calc_bootstrap_error(samples, 0.05)
-
-    '''
-
-    means,cdf = calc_cdf(samples)
-    cdf_vals = [0.5-(alpha/2.0), 0.5, 0.5+(alpha/2.)]
-    mean_ret = np.interp(cdf_vals,cdf,means)
-    mean_vals=[mean_ret[1],mean_ret[2]-mean_ret[1],mean_ret[1]-mean_ret[0]]
-
-    return np.array(mean_vals)
-
-def calc_cdf(samples):
-
-    ''' Calculates a cumulative distribution function of the means of each
-    instance of resampled data.
-
-    Parameters
-    ----------
-    samples : array-like
-        Array of each resampled data.
-
-    Returns
-    -------
-    cdf : array-like
-        Array containing fraction of data below value x.
-    x : array-like
-        Array containing mean values for the cdf.
-
-    '''
-
-    means = np.sort(np.mean(samples,axis=1))
-    cdf = np.cumsum(means)/np.sum(means)
-
-    return means,cdf
-
-def plot_cdf(x, cdf, errors=None):
-
-    ''' Plots the cumulative distribution function of the means of each
-    instance of the resampled data. If errors are supplied, then vertical lines
-    will be plotted at each error.
-
-    Parameters
-    ----------
-    x : array-like
-        Array containing mean values for the cdf.
-    cdf : array-like
-        Array containing fraction of data below value x.
-    errors : tuple, float
-        Pair of errors on the mean to be plotted as vertical lines.
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-
-
-    '''
-
-    ax = plt.figure().add_subplot(111)
-    ax.plot(x, cdf)
-
-    # check for vertical error lines
-    if errors is not None:
-        ax.axvline(x=errors[0], ls=':', alpha=0.7, color='b')
-        ax.axvline(x=errors[1], ls='-', alpha=0.7, color='b')
-    ax.set_xlabel('Mean')
-    ax.set_ylabel('CDF')
-    ax.figure.show()
-
 def main():
 
     ''' Your goal is to write a bootstrap function for determining errors in a
@@ -190,14 +207,19 @@ def main():
 
     '''
 
-
     file_name = 'data/bootstrap_distribution.npy'
 
     data = load_data(file_name)
 
-    errors = bootstrap(data, 10, 0.05)
+    samples = bootstrap(data, 100)
 
-    print errors
+    conf_int = calc_bootstrap_error(samples, 0.05)
+
+    print conf_int
+
+    x, cdf = calc_cdf(samples)
+
+    plot_cdf(x, cdf, conf_int=conf_int)
 
 if __name__ == '__main__':
     main()

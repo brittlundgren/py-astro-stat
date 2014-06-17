@@ -1,46 +1,10 @@
 #!/usr/bin/python
 
-''' Activity to introduce the concept and implementation of the KS test.
 
-This activity is meant to help you practice Pythonic programming. Pythonic
-programming means to code for humans, not for computers. One of the clearest
-and most efficient ways to write your programs is to write their purpose and
-their functionalities first. The code below consists of the first steps of
-efficient programming.
-
-Modular coding is key to success! The coder in this case has recognized what
-the separate tasks are in their problem and wrote them into individual
-functions. You will notice that there is no code written though! The coder has
-designed their code before writing it. You will notice each function has a
-number of arguments and a docstring (documentation) describing the arguments of
-the function.
-
-Your job is to finish the code.
-
-Perform the activity in the following way:
-    1. Read each of the functions, their arguments, and their docstrings.
-    Overall instructions will be under the main() function.
-
-    2. Discuss with your group how to implement the design to solve the problem
-    at hand.
-
-    3. Implement the code in pairs or as a single group.
-
-    4. Perform any additional analysis on your results to test their validity.
-
-    5. Choose an individual presenter. Prepare a short presentation < 3 min to
-    present to the class on how you solved the problem and what your results
-    are. Discuss with the class what were the weaknesses of the design and what
-    you would change.
-
-The function at the bottom, main(), is where you will write your script. Python
-sets the __name__ variable to be equal to '__main__' in this case, thus the
-script will execute the main() function. This is a common and composed way to
-write scripts in Python.
-
-*** Read the main function docstring first! ***
-
-'''
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy
+import os
 
 def derive_dist_mod_tables(z_lims, n_bins):
 
@@ -102,7 +66,45 @@ def compute_luminosity_function(z, m, M, m_max, archive_file, Nbootstraps=20):
 
     '''
 
-    pass # delete line after code is written
+def cut_data(data, z_min, z_max, m_max):
+
+    ''' Performs redshift/magnitude cuts on the data.
+
+    Parameters
+    ----------
+    data : array-like
+        Dictionary of sdss galaxies
+    z_min : float
+        Lower redshift limit
+    z_max : float
+        Higher redshift limit
+    m_max : float
+        Upper apparent magnitude limit
+
+    Returns
+    -------
+    data_red : array-like
+        Cut data including red galaxies
+    data_blue : array-like
+        Cut data including blue galaxies
+
+    '''
+
+
+    # redshift and magnitude cuts
+    data = data[data['z'] > z_min]
+    data = data[data['z'] < z_max]
+    data = data[data['petroMag_r'] < m_max]
+
+    # divide red sample and blue sample based on u-r color
+    ur = data['modelMag_u'] - data['modelMag_r']
+    flag_red = (ur > 2.22)
+    flag_blue = ~flag_red # tilde means inverse
+
+    data_red = data[flag_red]
+    data_blue = data[flag_blue]
+
+    return data_red, data_blue
 
 def plot_luminosity_function(Mbins, dist_M_list, err_M_list):
 
@@ -126,7 +128,8 @@ def plot_luminosity_function(Mbins, dist_M_list, err_M_list):
 
     '''
 
-    pass # delete line after code is written
+    from astroML.plotting import setup_text_plots
+    setup_text_plots(fontsize=8, usetex=False)
 
 def plot_num_density(zbins, dist_z_list, err_z_list):
 
@@ -152,7 +155,8 @@ def plot_num_density(zbins, dist_z_list, err_z_list):
 
     '''
 
-    pass # delete line after code is written
+    from astroML.plotting import setup_text_plots
+    setup_text_plots(fontsize=8, usetex=False)
 
 def main():
 
@@ -193,18 +197,19 @@ def main():
 
     '''
 
-    pass # delete line after code is written
+    from astroML.datasets import fetch_sdss_specgals
+
+    data = fetch_sdss_specgals()
+
+    z_min = 0.08
+    z_max = 0.12
+    m_max = 17.7
+
+    data_red, data_blue = cut_data(data, z_min, z_max, m_max)
+
+
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
 
 

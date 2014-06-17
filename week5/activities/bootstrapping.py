@@ -41,6 +41,10 @@ write scripts in Python.
 
 '''
 
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
 def bootstrap(data, num_samples, alpha, return_samples=False):
 
     ''' Bootstraps data to determine errors. Resamples the data num_samples
@@ -64,6 +68,11 @@ def bootstrap(data, num_samples, alpha, return_samples=False):
     samples : array-like
         Array of each resampled data. Will have one extra dimension than the
         data of length num_samples, representing each simulation.
+
+    Notes
+    -----
+    -> arrays can be initialized with numpy.empty
+    -> random samples can be retrieved from an array with random.sample
 
     Examples
     --------
@@ -113,8 +122,19 @@ def calc_bootstrap_error(samples, alpha):
 
     Returns
     -------
-    conf_int : tuple, float
-        Lower error and upper error at confidence of the data.
+    conf_int : tuple, float, optional
+        Mean of the data, the lower error and the upper error at 100*(1-alpha)
+        confidence of the data.
+
+    Notes
+    -----
+    -> To find the index in an array closest to a given value, use the
+    numpy.argmin function to find the index of the minimum value in an array.
+    For example to find the value closest to 11.1 in an array of 10, 11, and 12:
+        >>> import numpy as np
+        >>> a = np.array([10, 11, 12])
+        >>> print(np.argmin(np.abs(a - 11.1)))
+        1
 
     Examples
     --------
@@ -126,7 +146,7 @@ def calc_bootstrap_error(samples, alpha):
 
     '''
 
-    pass # comment after function code written
+    pass # delete after function code written
 
 def calc_cdf(samples):
 
@@ -149,7 +169,7 @@ def calc_cdf(samples):
 
     pass # delete after function code written
 
-def plot_cdf(x, cdf, errors=None):
+def plot_cdf(x, cdf, conf_int=None):
 
     ''' Plots the cumulative distribution function of the means of each
     instance of the resampled data. If errors are supplied, then vertical lines
@@ -161,18 +181,30 @@ def plot_cdf(x, cdf, errors=None):
         Array containing mean values for the cdf.
     cdf : array-like
         Array containing fraction of data below value x.
-    errors : tuple, float
-        Pair of errors on the mean to be plotted as vertical lines.
+    conf_int : tuple, float, optional
+        Mean of the data, the lower error and the upper error at 100*(1-alpha)
+        confidence of the data.
 
     Returns
     -------
     None
 
-    Notes
-    -----
-
-
     '''
+
+    # Set up figure
+    ax = plt.figure().add_subplot(111)
+    ax.set_xlabel('Mean')
+    ax.set_ylabel('CDF')
+
+    # Plot CDF of bootstrap means
+    ax.plot(x, cdf)
+
+    # check for vertical error lines
+    if conf_int is not None:
+        ax.axvline(x=conf_int[0] - conf_int[1], ls=':', alpha=0.7, color='b')
+        ax.axvline(x=conf_int[0] + conf_int[2], ls='-', alpha=0.7, color='b')
+
+    ax.figure.show()
 
 def main():
 
@@ -183,18 +215,18 @@ def main():
     times, allowing the same point to be drawn more than once. The means of
     each of these resamples are calculated and stored. A cumulative
     distribution function (CDF) of the means are calculated, from which
-    confidence intervals can be calculated. Remember an error at 95% confidence
-    means gives the value of the mean where the CDF is below 2.5% for the lower
+    confidence intervals can be calculated. Remember errors at 95% confidence
+    gives the value of the mean where the CDF is below 2.5% for the lower
     error and above 97.5% for the higher error.
 
-    Load the example distribution './data/boostrap_distribution.npy' and
-    calculate the error on the distribution at a given confidence level. Make a
-    plot of the CDF of the bootstrap means. Include vertical lines marking
-    the errors at a given confidence level.
+    Load the example distribution './data/bootstrap_distribution.npy' and
+    calculate the error about the mean of the distribution at a given
+    confidence level. Make a plot of the CDF of the bootstrap means. Include
+    vertical lines marking the errors at a given confidence level.
 
     '''
 
-    pass
+    pass # delete after function code written
 
 if __name__ == '__main__':
     main()
