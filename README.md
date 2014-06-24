@@ -35,7 +35,7 @@ git push origin newbranch
 ```
 When finished, switch back to the master branch.
 ```bash
-git checkout -b master
+git checkout master
 ```
 Push your edits to the master branch
 ```bash
