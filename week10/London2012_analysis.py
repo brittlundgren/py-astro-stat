@@ -45,7 +45,7 @@ if __name__ == '__main__':
                 # Name,Country,Age,Height_cm,Weight_kg,Sex,Date of birth,Place of birth,Gold,Silver,Bronze,Total,Sport,Event
                 Name.append(str(cols[0]))
                 Country.append(str(cols[1]))
-                Age.append(int(cols[2]))
+                Age.append(float(cols[2]))
                 Height.append(float(cols[3]))
                 Weight.append(float(cols[4]))
                 Sex.append(str(cols[5]))
