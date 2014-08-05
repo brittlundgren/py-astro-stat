@@ -1,7 +1,7 @@
 # Britt Lundgren
 # July 29, 2014
 #
-# Script to create spec*dat files from spPlate data for SEQUELS quasars
+# Script to classify summer Olympic athletes by their physical parameters.
 #
 
 import os, sys
